@@ -7,108 +7,180 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"shadowmixer/config"
+	"shadowmixer/store"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"shadowmixer/config"
 )
 
-// StreamMessage structure matching the worker's definition
-type StreamMessage struct {
-	Type    string `json:"type"`
-	Payload string `json:"payload"`
+// Fragment represents a sub-task of a larger request
+type Fragment struct {
+	BigTaskID  string `json:"big_task_id"`
+	SequenceID int    `json:"sequence_id"`
+	Total      int    `json:"total"`
+	Content    string `json:"content"`
+	Model      string `json:"model"`
 }
 
-type TaskPayload struct {
-	ID   string          `json:"id"`
-	Body json.RawMessage `json:"body"`
+type OpenAIRequest struct {
+	Model    string `json:"model"`
+	Messages []struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	} `json:"messages"`
 }
 
-func SetupRouter(rdb *redis.Client, cfg *config.Config) *gin.Engine {
+func SetupRouter(s store.Store, cfg *config.Config) *gin.Engine {
 	r := gin.Default()
 
-	// Generic proxy handler
-	r.POST("/*any", func(c *gin.Context) {
-		// 1. Identity Stripping (Stateless)
-		// We read the body and ignore client headers/IP
-		body, err := io.ReadAll(c.Request.Body)
+	// Aggregator Endpoint: Check status of a BigTask
+	r.GET("/v1/tasks/:id", func(c *gin.Context) {
+		taskID := c.Param("id")
+		ctx := context.Background()
+
+		// Get all fragments from Redis Hash: results:taskID -> {seqID: result}
+		results, err := s.GetResults(ctx, "results:"+taskID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch results"})
+			return
+		}
+
+		if len(results) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"status": "pending", "message": "No results yet"})
+			return
+		}
+
+		// We need to know total count. It's stored in a separate key or we infer it.
+		// For simplicity, let's store metadata separately.
+		totalStr, err := s.GetMeta(ctx, "meta:"+taskID+":total")
+		if err != nil {
+			// If meta is missing, we might still be processing
+			c.JSON(http.StatusOK, gin.H{"status": "processing", "completed": len(results)})
+			return
+		}
+		
+		var total int
+		fmt.Sscanf(totalStr, "%d", &total)
+
+		if len(results) < total {
+			c.JSON(http.StatusOK, gin.H{
+				"status":    "processing",
+				"completed": len(results),
+				"total":     total,
+			})
+			return
+		}
+
+		// All done! Reassemble.
+		type ResultFragment struct {
+			SeqID   int
+			Content string
+		}
+		var frags []ResultFragment
+		for k, v := range results {
+			var seq int
+			fmt.Sscanf(k, "%d", &seq)
+			frags = append(frags, ResultFragment{SeqID: seq, Content: v})
+		}
+
+		// Sort by sequence
+		sort.Slice(frags, func(i, j int) bool {
+			return frags[i].SeqID < frags[j].SeqID
+		})
+
+		// Join content
+		var fullContent strings.Builder
+		for i, f := range frags {
+			if i > 0 {
+				fullContent.WriteString("\n\n")
+			}
+			fullContent.WriteString(f.Content)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"id":      taskID,
+			"status":  "completed",
+			"content": fullContent.String(),
+		})
+	})
+
+	// Submit Task Endpoint
+	r.POST("/v1/secure/chat", func(c *gin.Context) {
+		// 1. Parse Request
+		bodyBytes, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid body"})
 			return
 		}
 
-		// Generate a simple unique ID
-		taskID := fmt.Sprintf("req-%d-%d", time.Now().UnixNano(), rand.Intn(10000))
-
-		// Prepare task
-		task := TaskPayload{
-			ID:   taskID,
-			Body: json.RawMessage(body),
-		}
-		taskJSON, _ := json.Marshal(task)
-
-		// Subscribe to response channel BEFORE pushing to queue
-		// This ensures we don't miss the response if worker is super fast (unlikely with jitter)
-		ctx := context.Background()
-		pubsub := rdb.Subscribe(ctx, "response:"+taskID)
-		defer pubsub.Close()
-
-		// 2. Queue (Push to Redis List)
-		if err := rdb.RPush(ctx, "llm_queue", taskJSON).Err(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to queue request"})
+		var req OpenAIRequest
+		if err := json.Unmarshal(bodyBytes, &req); err != nil {
+			// Fallback for simple message format (if users send just a string or different format)
+			// But for now, let's just log and return error
+			fmt.Printf("JSON Unmarshal Error: %v. Body: %s\n", err, string(bodyBytes))
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format", "details": err.Error()})
 			return
 		}
 
-		// Determine Content-Type based on client request
-		// If client asks for event-stream, we give it. Otherwise default to json.
-		if c.GetHeader("Accept") == "text/event-stream" {
-			c.Header("Content-Type", "text/event-stream")
-		} else {
-			c.Header("Content-Type", "application/json")
+		// 2. Decompose (Simple Splitter Logic)
+		// We take the last user message and split it by newlines for this demo.
+		// In a real app, this would be more sophisticated.
+		lastMsg := ""
+		if len(req.Messages) > 0 {
+			lastMsg = req.Messages[len(req.Messages)-1].Content
 		}
-		c.Header("Cache-Control", "no-cache")
-		c.Header("Connection", "keep-alive")
-		c.Header("Transfer-Encoding", "chunked")
 
-		// 3. Wait for Transparent Return (Streaming)
-		c.Stream(func(w io.Writer) bool {
-			select {
-			case msg, ok := <-pubsub.Channel():
-				if !ok {
-					return false // Channel closed
-				}
-
-				var streamMsg StreamMessage
-				if err := json.Unmarshal([]byte(msg.Payload), &streamMsg); err != nil {
-					// Fallback: treat as raw string if unmarshal fails (unlikely)
-					return true
-				}
-
-				switch streamMsg.Type {
-				case "chunk":
-					c.Writer.Write([]byte(streamMsg.Payload))
-					c.Writer.Flush()
-					return true
-				case "error":
-					// If we haven't sent headers yet, we could change status code,
-					// but here we are streaming, so we just append error text.
-					// In a better impl, we might wrap error in JSON.
-					errMsg := fmt.Sprintf(`{"error": "%s"}`, streamMsg.Payload)
-					c.Writer.Write([]byte(errMsg))
-					return false
-				case "done":
-					return false
-				default:
-					return true
-				}
-			case <-time.After(300 * time.Second):
-				// Timeout
-				return false
-			case <-c.Request.Context().Done():
-				// Client disconnected
-				return false
+		// Split by newline, filtering empty lines
+		lines := strings.Split(lastMsg, "\n")
+		var fragments []string
+		for _, line := range lines {
+			if strings.TrimSpace(line) != "" {
+				fragments = append(fragments, line)
 			}
+		}
+
+		if len(fragments) == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Empty content"})
+			return
+		}
+
+		bigTaskID := fmt.Sprintf("task-%d", time.Now().UnixNano())
+		ctx := context.Background()
+
+		// Store metadata
+		s.SetMeta(ctx, "meta:"+bigTaskID+":total", fmt.Sprintf("%d", len(fragments)), 24*time.Hour)
+
+		// 3. Shuffle & Queue
+		// We create fragment objects and push them to Redis
+		// To demonstrate shuffle, we could randomize insertion order, 
+		// but since the queue is FIFO and workers are concurrent, just pushing them is fine.
+		// The "Shuffle" happens because multiple users are pushing at once.
+		
+		for i, content := range fragments {
+			frag := Fragment{
+				BigTaskID:  bigTaskID,
+				SequenceID: i,
+				Total:      len(fragments),
+				Content:    content,
+				Model:      req.Model,
+			}
+			
+			fragJSON, _ := json.Marshal(frag)
+			if err := s.PushQueue(ctx, "llm_fragment_queue", string(fragJSON)); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to queue fragments"})
+				return
+			}
+		}
+
+		// Return the Task ID immediately (Async processing)
+		c.JSON(http.StatusAccepted, gin.H{
+			"id":      bigTaskID,
+			"status":  "queued",
+			"fragments": len(fragments),
+			"poll_url": fmt.Sprintf("/v1/tasks/%s", bigTaskID),
 		})
 	})
 

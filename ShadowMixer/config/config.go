@@ -19,6 +19,16 @@ type Config struct {
 		APIKeys []string `yaml:"api_keys"`
 		Target  string   `yaml:"target"` // e.g. https://api.openai.com/v1/chat/completions
 	} `yaml:"llm"`
+	Security struct {
+		AnonymizationLevel string  `yaml:"anonymization_level"`
+		LocalMasking       bool    `yaml:"local_masking"`
+	} `yaml:"security"`
+	Routing struct {
+		APIPools []struct {
+			Provider string   `yaml:"provider"`
+			Keys     []string `yaml:"keys"`
+		} `yaml:"api_pools"`
+	} `yaml:"routing"`
 }
 
 var Global *Config

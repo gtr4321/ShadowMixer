@@ -11,4 +11,15 @@ llm:
     - "sk-mock-key-1"
     - "sk-mock-key-2"
     - "sk-mock-key-3"
-  target: "https://api.openai.com/v1/chat/completions"
+  target: "http://localhost:8081/v1/chat/completions"
+
+security:
+  anonymization_level: "high"   # 开启多用户交叉混淆
+  local_masking: true          # 开启本地实体脱敏
+
+routing:
+  api_pools:
+    - provider: "openai"
+      keys: ["sk-1", "sk-2", "sk-3"]
+    - provider: "anthropic"
+      keys: ["sk-ant-1"]

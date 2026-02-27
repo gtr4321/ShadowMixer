@@ -1,49 +1,84 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
 )
 
+type ChatCompletionResponse struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	Model   string `json:"model"`
+	Choices []struct {
+		Index   int `json:"index"`
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
+	} `json:"choices"`
+}
+
 func main() {
 	http.HandleFunc("/v1/chat/completions", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Received request")
+		body, _ := io.ReadAll(r.Body)
+		fmt.Printf("Received request: %s\n", string(body))
 		
-		// Set headers for SSE
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "keep-alive")
+		// Set headers
+		w.Header().Set("Content-Type", "application/json")
 
-		flusher, ok := w.(http.Flusher)
-		if !ok {
-			http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
-			return
+		// Mock standard response (non-streaming)
+		// We'll just echo back "Processed: <input>"
+		
+		// Extract user content for realism
+		var req struct {
+			Messages []struct {
+				Content string `json:"content"`
+			} `json:"messages"`
+		}
+		json.Unmarshal(body, &req)
+		
+		userContent := "unknown"
+		if len(req.Messages) > 0 {
+			userContent = req.Messages[0].Content
 		}
 
-		// Mock streaming response
-		chunks := []string{
-			"Hello", " ", "world", "!", " This", " is", " a", " test", " stream.",
-		}
+		// Simulate processing time
+		time.Sleep(500 * time.Millisecond)
 
-		for _, chunk := range chunks {
-			// Simulate processing time
-			time.Sleep(200 * time.Millisecond)
-			
-			// Send chunk in OpenAI format (optional, but good for realism)
-			// For simplicity, just send raw text first to verify our pipe
-			// fmt.Fprintf(w, "data: %s\n\n", chunk)
-			
-			// Actually, let's just send raw text since our worker reads raw bytes
-			// If we want to simulate OpenAI fully, we'd send SSE events.
-			// But our worker just blindly forwards whatever it reads.
-			// So if we send raw text here, the client gets raw text chunks.
-			fmt.Fprintf(w, "%s", chunk)
-			flusher.Flush()
+		resp := ChatCompletionResponse{
+			ID:      "chatcmpl-mock",
+			Object:  "chat.completion",
+			Created: time.Now().Unix(),
+			Model:   "mock-gpt",
 		}
+		resp.Choices = append(resp.Choices, struct {
+			Index   int `json:"index"`
+			Message struct {
+				Role    string `json:"role"`
+				Content string `json:"content"`
+			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
+		}{
+			Index: 0,
+			Message: struct {
+				Role    string `json:"role"`
+				Content string `json:"content"`
+			}{
+				Role:    "assistant",
+				Content: "[Processed] " + userContent,
+			},
+			FinishReason: "stop",
+		})
+
+		json.NewEncoder(w).Encode(resp)
 	})
 
-	fmt.Println("Mock LLM Server running on :8081")
+	fmt.Println("Mock LLM Server running on :8081 (Non-Streaming Mode)")
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
