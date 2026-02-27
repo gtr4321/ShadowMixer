@@ -1,6 +1,6 @@
-# ShadowMixer — 企业级大模型隐私混淆与边界防御引擎（ShadowMixer — Enterprise-Grade LLM Privacy Obfuscation & Defense Engine）
+# ShadowMixer — AI 时代的 Tor 与混币器
 
-ShadowMixer 是一款专为 AI 时代设计的开源安全中间件。它通过核心的碎片化混淆（Fragmented Obfuscation）与多租户匿名聚合技术，将 OpenAI、Anthropic、Gemini 等大模型厂商彻底降级为受控的“匿名算力供应商”。在“零信任” AI 架构下，ShadowMixer 能够确保任何敏感意图、核心代码或私域知识在离开企业内网前，就已经被拆解为无法还原的语义碎片。
+ShadowMixer 是一个开源的 AI 隐私混币器和零信任网关。受 Tor 和 CoinJoin 启发，它利用碎片化混淆技术（Fragmented Obfuscation）将智能与身份解耦，将大模型提供商降级为盲目的算力供应商。通过语义多租户匿名性保护您的意图和业务逻辑。
 
 本项目不仅是开发者的利器，更是构建 **AI 安全关口（AI Security Gateway）** 的核心引擎。在多用户并发环境下，ShadowMixer 会产生强大的“群体掩护”效应，让追踪单个用户的商业意图在统计学上变得几乎不可能。
 
@@ -111,9 +111,9 @@ curl -X POST http://localhost:8080/v1/secure/chat \
 
 ---
 
-# ShadowMixer — Enterprise-Grade LLM Privacy Obfuscation & Defense Engine（ShadowMixer — 企业级大模型隐私混淆与边界防御引擎）
+# ShadowMixer — Tor & Mixer for the AI Era
 
-ShadowMixer is an open-source security middleware designed for the AI era. Through its core Fragmented Obfuscation and Multi-Tenant Anonymous Aggregation technologies, it effectively downgrades major LLM providers like OpenAI, Anthropic, and Gemini into controlled "anonymous compute vendors." Under a "Zero Trust" AI architecture, ShadowMixer ensures that any sensitive intent, core code, or proprietary knowledge is decomposed into irreversible semantic fragments before leaving the corporate intranet.
+ShadowMixer is an open-source AI privacy mixer and zero-trust gateway. Inspired by Tor and CoinJoin, it uses Fragmented Obfuscation to decouple intelligence from identity, downgrading LLM providers into blind compute vendors. Protect your intent and business logic through semantic multi-tenant anonymity.
 
 This project is not just a tool for developers but the core engine for building an **AI Security Gateway**. In a multi-user concurrent environment, ShadowMixer generates a powerful "crowd cover" effect, making it statistically impossible to trace the commercial intent of a single user.
 
