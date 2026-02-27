@@ -34,3 +34,6 @@ ShadowMixer 是一个用于拦截和代理发往大模型厂商（OpenAI/Anthrop
 
 ## 许可证
 MIT License
+
+## 感谢
+感谢trae和gemini
