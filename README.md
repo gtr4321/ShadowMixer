@@ -14,9 +14,8 @@ ShadowMixer 是一款专为 AI 时代设计的开源安全中间件。它通过�
    - **多租户混淆**：不同用户的任务碎片进入同一个全局调度池。在大模型厂商看来，这些请求序列是交织在一起的“语义流”，无法通过 IP 或 API Key 区分行为边界。
    - **网络规模增益**：用户越多，隐私越强。随着并发量增加，单个用户的特征会被淹没在海量的背景噪声中，彻底瓦解厂商的用户画像能力。
 
-2. **拟人化外壳与语义噪声 (Anthropomorphic Shell & Chaffing)**
+2. **拟人化外壳 (Anthropomorphic Shell)**
    - **防风控伪装**：为干瘪的碎片穿上自然语言“外壳”，使其看起来像合法的、独立的咨询请求，规避厂商的输入完整性校验。
-   - **蜜罐注入**：自动注入 20% 的无效“语义噪声”，主动毒化厂商的意图聚类模型。
 
 3. **本地状态机与分层路由 (Local State & Tiered Routing)**
    - **逻辑重组**：本地数据库实时维护任务状态，无需将上下文传回云端。
@@ -129,9 +128,8 @@ This project is not just a tool for developers but the core engine for building 
    - **Multi-Tenant Obfuscation**: Task fragments from different users enter the same global scheduling pool. To LLM vendors, these request sequences appear as interwoven "semantic streams," indistinguishable by IP or API Key boundaries.
    - **Network Scale Gain**: The more users, the stronger the privacy. As concurrency increases, a single user's characteristics are drowned out in massive background noise, completely dismantling the vendor's user profiling capabilities.
 
-2. **Anthropomorphic Shell & Chaffing**
+2. **Anthropomorphic Shell**
    - **Anti-Risk Control Camouflage**: Wraps dry fragments in a natural language "shell" to make them look like legitimate, independent inquiries, bypassing vendor input integrity checks.
-   - **Honeypot Injection**: Automatically injects 20% invalid "semantic noise" to actively poison the vendor's intent clustering models.
 
 3. **Local State & Tiered Routing**
    - **Logic Reassembly**: A local database maintains task state in real-time, eliminating the need to send context back to the cloud.
