@@ -1,0 +1,14 @@
+server:
+  port: ":8080"
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+llm:
+  api_keys:
+    - "sk-mock-key-1"
+    - "sk-mock-key-2"
+    - "sk-mock-key-3"
+  target: "https://api.openai.com/v1/chat/completions"
