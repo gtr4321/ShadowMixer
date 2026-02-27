@@ -1,117 +1,4 @@
-# ShadowMixer — Enterprise-Grade LLM Privacy Obfuscation & Defense Engine
-
-ShadowMixer is an open-source security middleware designed for the AI era. Through its core Fragmented Obfuscation and Multi-Tenant Anonymous Aggregation technologies, it effectively downgrades major LLM providers like OpenAI, Anthropic, and Gemini into controlled "anonymous compute vendors." Under a "Zero Trust" AI architecture, ShadowMixer ensures that any sensitive intent, core code, or proprietary knowledge is decomposed into irreversible semantic fragments before leaving the corporate intranet.
-
-This project is not just a tool for developers but the core engine for building an **AI Security Gateway**. In a multi-user concurrent environment, ShadowMixer generates a powerful "crowd cover" effect, making it statistically impossible to trace the commercial intent of a single user.
-
-> 💡 **Core Analogy: "The Braised Pork in the Crowd"**
->
-> You want to eat braised pork, but you don't want the outside world to know the recipe. ShadowMixer chops the ingredients and mixes them into the orders of thousands of people across the city, distributing them randomly to different chefs (LLM vendors). The chefs only see countless people buying "sugar, meat, soy sauce," but they cannot piece together who is eating braised pork, nor can they steal your exclusive recipe.
-
-## ✨ Core Security Features
-
-1. **Crowd Anonymity**
-   - **Multi-Tenant Obfuscation**: Task fragments from different users enter the same global scheduling pool. To LLM vendors, these request sequences appear as interwoven "semantic streams," indistinguishable by IP or API Key boundaries.
-   - **Network Scale Gain**: The more users, the stronger the privacy. As concurrency increases, a single user's characteristics are drowned out in massive background noise, completely dismantling the vendor's user profiling capabilities.
-
-2. **Anthropomorphic Shell & Efficiency**
-   - **Anti-Risk Control Camouflage**: Wraps dry fragments in a natural language "shell" to make them look like legitimate, independent inquiries, bypassing vendor input integrity checks.
-   - **Zero Compute Waste**: ShadowMixer focuses on efficient obfuscation and **never wastes precious compute resources by sending invalid requests**. Every bit of compute is used for real business value.
-
-3. **Local State & Tiered Routing**
-   - **Logic Reassembly**: A local database maintains task state in real-time, eliminating the need to send context back to the cloud.
-   - **Privacy Tiering**: Extremely sensitive tasks are handled by local small models, while computational tasks are processed via cloud obfuscation.
-
-## ⚙️ Core Workflow
-
-1. **Decompose & Mask**: Decomposes complex instructions into $N$ atomic fragments and performs entity encryption/masking locally.
-2. **Shuffle & Inject**: Mixes all user fragments into a high-concurrency pool, adding random delays (Jitter) and shuffling the order.
-3. **Compute Routing**: Worker nodes retrieve fragments from the pool and use Key Pooling to distribute requests to upstream vendors.
-4. **Reassemble**: The aggregator strips shells, filters noise, restores entities based on TaskID, and delivers the assembled result to the user.
-
-## 🎯 Use Cases
-
-- **Enterprise AI Privacy Firewall**: Solves compliance issues where employees leak code or business plans while using ChatGPT.
-- **Decentralized AI Security Agent**: Acts as a secure communication layer for Agents, blocking cloud eavesdropping on the enterprise "chain of thought."
-- **Data Asset Desensitization Hub**: Enables healthcare and finance sectors to use public cloud compute for massive document processing under compliance.
-- **Low-Cost Privacy Alternative**: Compared to the high compute threshold and complex cross-organization coordination of Federated LLMs, ShadowMixer offers a "zero infrastructure" privacy protection path.
-- **Public Cloud Capability Replacement**: Enterprises can leverage top-tier public cloud model inference without building expensive local GPU clusters for training or fine-tuning, significantly reducing the TCO of AI compliance while ensuring data safety.
-
-## 🗺️ Architecture Diagram
-
-```mermaid
-graph TD
-    subgraph "Enterprise Secure Zone (Multi-User)"
-        U1[User A] --> Gateway
-        U2[User B] --> Gateway
-        U3[User C] --> Gateway
-        Gateway -->|Decompose| LocalEngine[Local NLP / State DB]
-        LocalEngine -->|Shuffle & Jitter| FragmentPool[Global Anonymous Pool]
-    end
-     
-    subgraph "Obfuscation & Distribution Layer"
-        FragmentPool -->|Encapsulate| Worker1
-        FragmentPool -->|Encapsulate| Worker2
-        FragmentPool -->|Encapsulate| Worker3
-    end
-     
-    subgraph "Public Cloud (Compute Providers)"
-        Worker1 -->|Fragment| OpenAI
-        Worker2 -->|Fragment| Gemini
-        Worker3 -->|Fragment| Anthropic
-    end
-     
-    OpenAI -->|Result| LocalEngine
-    Gemini -->|Result| LocalEngine
-     
-    LocalEngine -->|Reassemble| Gateway
-    Gateway -->|Final Response| U1
-```
-
-## 🚀 Quick Start
-
-### 1. Start the Security Engine
-
-```bash
-# Deploy ShadowMixer Multi-User Privacy Cluster
-docker-compose up --build -d
-```
-
-### 2. Configure Security Policy (`config.yaml`)
-
-```yaml
-security:
-  anonymization_level: "high"   # Enable multi-user cross-obfuscation
-  local_masking: true          # Enable local entity masking
-
-routing:
-  api_pools: 
-    - provider: "openai"
-      keys: ["sk-1", "sk-2", "sk-3"]
-    - provider: "anthropic"
-      keys: ["sk-ant-1"]
-```
-
-### 3. API Call (OpenAI Compatible Mode)
-
-ShadowMixer provides a fully transparent interface wrapper. Just change the Base URL to achieve privacy hardening:
-
-```bash
-curl -X POST http://localhost:8080/v1/secure/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": "Analyze this core code logic: [Code Fragment...]"}]
-  }'
-```
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-# ShadowMixer — 企业级大模型隐私混淆与边界防御引擎
+# ShadowMixer — 企业级大模型隐私混淆与边界防御引擎（ShadowMixer — Enterprise-Grade LLM Privacy Obfuscation & Defense Engine）
 
 ShadowMixer 是一款专为 AI 时代设计的开源安全中间件。它通过核心的碎片化混淆（Fragmented Obfuscation）与多租户匿名聚合技术，将 OpenAI、Anthropic、Gemini 等大模型厂商彻底降级为受控的“匿名算力供应商”。在“零信任” AI 架构下，ShadowMixer 能够确保任何敏感意图、核心代码或私域知识在离开企业内网前，就已经被拆解为无法还原的语义碎片。
 
@@ -221,3 +108,116 @@ curl -X POST http://localhost:8080/v1/secure/chat \
 ## 📄 许可证
 
 本项目采用 MIT License。
+
+---
+
+# ShadowMixer — Enterprise-Grade LLM Privacy Obfuscation & Defense Engine（ShadowMixer — 企业级大模型隐私混淆与边界防御引擎）
+
+ShadowMixer is an open-source security middleware designed for the AI era. Through its core Fragmented Obfuscation and Multi-Tenant Anonymous Aggregation technologies, it effectively downgrades major LLM providers like OpenAI, Anthropic, and Gemini into controlled "anonymous compute vendors." Under a "Zero Trust" AI architecture, ShadowMixer ensures that any sensitive intent, core code, or proprietary knowledge is decomposed into irreversible semantic fragments before leaving the corporate intranet.
+
+This project is not just a tool for developers but the core engine for building an **AI Security Gateway**. In a multi-user concurrent environment, ShadowMixer generates a powerful "crowd cover" effect, making it statistically impossible to trace the commercial intent of a single user.
+
+> 💡 **Core Analogy: "The Braised Pork in the Crowd"**
+>
+> You want to eat braised pork, but you don't want the outside world to know the recipe. ShadowMixer chops the ingredients and mixes them into the orders of thousands of people across the city, distributing them randomly to different chefs (LLM vendors). The chefs only see countless people buying "sugar, meat, soy sauce," but they cannot piece together who is eating braised pork, nor can they steal your exclusive recipe.
+
+## ✨ Core Security Features
+
+1. **Crowd Anonymity**
+   - **Multi-Tenant Obfuscation**: Task fragments from different users enter the same global scheduling pool. To LLM vendors, these request sequences appear as interwoven "semantic streams," indistinguishable by IP or API Key boundaries.
+   - **Network Scale Gain**: The more users, the stronger the privacy. As concurrency increases, a single user's characteristics are drowned out in massive background noise, completely dismantling the vendor's user profiling capabilities.
+
+2. **Anthropomorphic Shell & Efficiency**
+   - **Anti-Risk Control Camouflage**: Wraps dry fragments in a natural language "shell" to make them look like legitimate, independent inquiries, bypassing vendor input integrity checks.
+   - **Zero Compute Waste**: ShadowMixer focuses on efficient obfuscation and **never wastes precious compute resources by sending invalid requests**. Every bit of compute is used for real business value.
+
+3. **Local State & Tiered Routing**
+   - **Logic Reassembly**: A local database maintains task state in real-time, eliminating the need to send context back to the cloud.
+   - **Privacy Tiering**: Extremely sensitive tasks are handled by local small models, while computational tasks are processed via cloud obfuscation.
+
+## ⚙️ Core Workflow
+
+1. **Decompose & Mask**: Decomposes complex instructions into $N$ atomic fragments and performs entity encryption/masking locally.
+2. **Shuffle & Inject**: Mixes all user fragments into a high-concurrency pool, adding random delays (Jitter) and shuffling the order.
+3. **Compute Routing**: Worker nodes retrieve fragments from the pool and use Key Pooling to distribute requests to upstream vendors.
+4. **Reassemble**: The aggregator strips shells, filters noise, restores entities based on TaskID, and delivers the assembled result to the user.
+
+## 🎯 Use Cases
+
+- **Enterprise AI Privacy Firewall**: Solves compliance issues where employees leak code or business plans while using ChatGPT.
+- **Decentralized AI Security Agent**: Acts as a secure communication layer for Agents, blocking cloud eavesdropping on the enterprise "chain of thought."
+- **Data Asset Desensitization Hub**: Enables healthcare and finance sectors to use public cloud compute for massive document processing under compliance.
+- **Low-Cost Privacy Alternative**: Compared to the high compute threshold and complex cross-organization coordination of Federated LLMs, ShadowMixer offers a "zero infrastructure" privacy protection path.
+- **Public Cloud Capability Replacement**: Enterprises can leverage top-tier public cloud model inference without building expensive local GPU clusters for training or fine-tuning, significantly reducing the TCO of AI compliance while ensuring data safety.
+
+## 🗺️ Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph "Enterprise Secure Zone (Multi-User)"
+        U1[User A] --> Gateway
+        U2[User B] --> Gateway
+        U3[User C] --> Gateway
+        Gateway -->|Decompose| LocalEngine[Local NLP / State DB]
+        LocalEngine -->|Shuffle & Jitter| FragmentPool[Global Anonymous Pool]
+    end
+     
+    subgraph "Obfuscation & Distribution Layer"
+        FragmentPool -->|Encapsulate| Worker1
+        FragmentPool -->|Encapsulate| Worker2
+        FragmentPool -->|Encapsulate| Worker3
+    end
+     
+    subgraph "Public Cloud (Compute Providers)"
+        Worker1 -->|Fragment| OpenAI
+        Worker2 -->|Fragment| Gemini
+        Worker3 -->|Fragment| Anthropic
+    end
+     
+    OpenAI -->|Result| LocalEngine
+    Gemini -->|Result| LocalEngine
+     
+    LocalEngine -->|Reassemble| Gateway
+    Gateway -->|Final Response| U1
+```
+
+## 🚀 Quick Start
+
+### 1. Start the Security Engine
+
+```bash
+# Deploy ShadowMixer Multi-User Privacy Cluster
+docker-compose up --build -d
+```
+
+### 2. Configure Security Policy (`config.yaml`)
+
+```yaml
+security:
+  anonymization_level: "high"   # Enable multi-user cross-obfuscation
+  local_masking: true          # Enable local entity masking
+
+routing:
+  api_pools: 
+    - provider: "openai"
+      keys: ["sk-1", "sk-2", "sk-3"]
+    - provider: "anthropic"
+      keys: ["sk-ant-1"]
+```
+
+### 3. API Call (OpenAI Compatible Mode)
+
+ShadowMixer provides a fully transparent interface wrapper. Just change the Base URL to achieve privacy hardening:
+
+```bash
+curl -X POST http://localhost:8080/v1/secure/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Analyze this core code logic: [Code Fragment...]"}]
+  }'
+```
+
+## 📄 License
+
+This project is licensed under the MIT License.
