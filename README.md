@@ -14,8 +14,9 @@ ShadowMixer 是一款专为 AI 时代设计的开源安全中间件。它通过�
    - **多租户混淆**：不同用户的任务碎片进入同一个全局调度池。在大模型厂商看来，这些请求序列是交织在一起的“语义流”，无法通过 IP 或 API Key 区分行为边界。
    - **网络规模增益**：用户越多，隐私越强。随着并发量增加，单个用户的特征会被淹没在海量的背景噪声中，彻底瓦解厂商的用户画像能力。
 
-2. **拟人化外壳 (Anthropomorphic Shell)**
+2. **拟人化外壳与算力节约 (Anthropomorphic Shell & Efficiency)**
    - **防风控伪装**：为干瘪的碎片穿上自然语言“外壳”，使其看起来像合法的、独立的咨询请求，规避厂商的输入完整性校验。
+   - **零算力浪费 (Zero Compute Waste)**：ShadowMixer 专注于高效混淆，**绝不通过发送无效请求来浪费宝贵的算力资源**。每一分算力都用于真实的业务价值。
 
 3. **本地状态机与分层路由 (Local State & Tiered Routing)**
    - **逻辑重组**：本地数据库实时维护任务状态，无需将上下文传回云端。
@@ -46,7 +47,6 @@ graph TD
         U3[User C] --> Gateway
         Gateway -->|Decompose| LocalEngine[Local NLP / State DB]
         LocalEngine -->|Shuffle & Jitter| FragmentPool[Global Anonymous Pool]
-        Noise[Honey-Request Gen] -->|Inject| FragmentPool
     end
      
     subgraph "Obfuscation & Distribution Layer"
@@ -58,7 +58,7 @@ graph TD
     subgraph "Public Cloud (Compute Providers)"
         Worker1 -->|Fragment| OpenAI
         Worker2 -->|Fragment| Gemini
-        Worker3 -->|Noise| Anthropic
+        Worker3 -->|Fragment| Anthropic
     end
      
     OpenAI -->|Result| LocalEngine
@@ -82,7 +82,6 @@ docker-compose up --build -d
 ```yaml
 security:
   anonymization_level: "high"   # 开启多用户交叉混淆
-  noise_ratio: 0.25            # 25% 干扰流量
   local_masking: true          # 开启本地实体脱敏
 
 routing:
@@ -128,8 +127,9 @@ This project is not just a tool for developers but the core engine for building 
    - **Multi-Tenant Obfuscation**: Task fragments from different users enter the same global scheduling pool. To LLM vendors, these request sequences appear as interwoven "semantic streams," indistinguishable by IP or API Key boundaries.
    - **Network Scale Gain**: The more users, the stronger the privacy. As concurrency increases, a single user's characteristics are drowned out in massive background noise, completely dismantling the vendor's user profiling capabilities.
 
-2. **Anthropomorphic Shell**
+2. **Anthropomorphic Shell & Efficiency**
    - **Anti-Risk Control Camouflage**: Wraps dry fragments in a natural language "shell" to make them look like legitimate, independent inquiries, bypassing vendor input integrity checks.
+   - **Zero Compute Waste**: ShadowMixer focuses on efficient obfuscation and **never wastes precious compute resources by sending invalid requests**. Every bit of compute is used for real business value.
 
 3. **Local State & Tiered Routing**
    - **Logic Reassembly**: A local database maintains task state in real-time, eliminating the need to send context back to the cloud.
@@ -160,7 +160,6 @@ graph TD
         U3[User C] --> Gateway
         Gateway -->|Decompose| LocalEngine[Local NLP / State DB]
         LocalEngine -->|Shuffle & Jitter| FragmentPool[Global Anonymous Pool]
-        Noise[Honey-Request Gen] -->|Inject| FragmentPool
     end
      
     subgraph "Obfuscation & Distribution Layer"
@@ -172,7 +171,7 @@ graph TD
     subgraph "Public Cloud (Compute Providers)"
         Worker1 -->|Fragment| OpenAI
         Worker2 -->|Fragment| Gemini
-        Worker3 -->|Noise| Anthropic
+        Worker3 -->|Fragment| Anthropic
     end
      
     OpenAI -->|Result| LocalEngine
@@ -196,7 +195,6 @@ docker-compose up --build -d
 ```yaml
 security:
   anonymization_level: "high"   # Enable multi-user cross-obfuscation
-  noise_ratio: 0.25            # 25% traffic noise
   local_masking: true          # Enable local entity masking
 
 routing:
