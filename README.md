@@ -7,7 +7,7 @@ ShadowMixer 是一个开源的 AI 隐私混币器和零信任网关。受 Tor �
 > 💡 **核心比喻：“消失在人海里的红烧肉”**
 >
 > 你想吃红烧肉，但不想让外界知道食谱。ShadowMixer 将食材切碎，混入全城成千上万人的食材订单中，随机分发给不同的厨师（LLM 厂商）。厨师们只看到无数人在买“糖、肉、酱油”，却无法拼凑出谁要吃红烧肉，更无法偷走你的独家秘方。
-
+ll
 ## ✨ 核心安全特性
 
 1. **群体匿名效应 (Crowd Anonymity)**
@@ -185,36 +185,46 @@ graph TD
 
 ### 1. Start the Security Engine
 
+The project has been completely rewritten in Rust for maximum security and performance.
+
+#### Option A: Run Locally (Recommended for Development)
+Ensure you have Rust and Redis installed.
+
+```bash
+cd rust-core
+# Start Redis locally on default port 6379
+cargo run --release
+```
+
+#### Option B: Docker Deployment
 ```bash
 # Deploy ShadowMixer Multi-User Privacy Cluster
 docker-compose up --build -d
 ```
 
-### 2. Configure Security Policy (`config.yaml`)
+### 2. Configuration
 
-```yaml
-security:
-  anonymization_level: "high"   # Enable multi-user cross-obfuscation
-  local_masking: true          # Enable local entity masking
+ShadowMixer is configured via environment variables (or `.env` file).
 
-routing:
-  api_pools: 
-    - provider: "openai"
-      keys: ["sk-1", "sk-2", "sk-3"]
-    - provider: "anthropic"
-      keys: ["sk-ant-1"]
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `REDIS_URL` | `redis://127.0.0.1:6379/0` | Redis connection URL |
+| `SERVER_PORT` | `0.0.0.0:8080` | HTTP Server binding |
+| `LLM_API_KEYS` | (Empty) | Comma-separated list of provider keys |
+| `LLM_TARGET_URL` | `https://api.openai.com...` | Upstream API Endpoint |
+| `LOCAL_MASKING` | `true` | Enable local PII sanitization |
 
-### 3. API Call (OpenAI Compatible Mode)
+### 3. API Usage
 
-ShadowMixer provides a fully transparent interface wrapper. Just change the Base URL to achieve privacy hardening:
+ShadowMixer supports `session_id` for multi-turn conversations.
 
 ```bash
 curl -X POST http://localhost:8080/v1/secure/chat \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4",
-    "messages": [{"role": "user", "content": "Analyze this core code logic: [Code Fragment...]"}]
+    "session_id": "my-secret-session",
+    "messages": [{"role": "user", "content": "Analyze this code..."}]
   }'
 ```
 
